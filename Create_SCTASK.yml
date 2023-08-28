@@ -1,0 +1,63 @@
+- name: Create ServiceNow SCTASK
+  hosts: localhost
+  gather_facts: no
+  vars:
+    task_short_description: "Testing of SCTASK Creation"
+    task_description: "Testing of SCTASK Creation"
+    assignee: "ABC"
+    task_state: "New"
+    workNotes: "Created SCTASK"
+
+  tasks:
+    - name: Task block with rescue
+      block:
+        - name: Retrieve ipaas url
+          set_fact:
+            url: "{{ ansible_user }}"
+
+        - name: Include the generated token
+          include_tasks: "SCTASK_Auth.yml"
+
+        #- name: Construct URL
+          #set_fact:
+            #api_url: "{{ url }}"
+            #action: "create"
+
+        #- name: Create Body for Create Task
+          #set_fact:
+            #body: '{
+              #"short_description": "{{ task_short_description }}",
+              #"description": "{{ task_description }}",
+              #"assigned_to": "{{ assignee }}",
+              #"state": "{{ task_state }}",
+              #"work_notes": "{{ workNotes }}"
+            #}'
+
+        #- name: API Request
+          #uri:
+            #url: "{{ api_url }}"
+            #method: POST
+            #headers:
+              #Authorization: "Bearer {{ servicenow_token }}"
+              #Content-Type: "application/json"
+            #body_format: json
+            #body: "{{ body }}"
+            #status_code: 201
+            #force_basic_auth: yes
+            #user: "{{ servicenow_username }}"
+            #password: "{{ servicenow_password }}"
+          #register: result
+
+        #- name: Check API response
+          #debug:
+            #var: result
+
+        #- name: Check API response status
+          #debug:
+            #msg: "SCTASK created successfully"
+          #when: result.status == 201
+      #rescue:
+        #- name: Check API response status
+          #fail:
+            #msg: "Failed to create SCTASK. Error: {{ result }}"
+          #when: result.status != 201
