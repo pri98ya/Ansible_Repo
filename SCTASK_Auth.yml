@@ -1,0 +1,54 @@
+---
+#- name: Obtain ServiceNow Token
+  #hosts: localhost
+  #tasks:
+    - name: Retrieve creds
+      set_fact:
+        url: "{{ ansible_user }}"
+        parts: "{{ ansible_password }}"
+   
+    - name: Split the string
+      set_fact:
+        parts: "{{ parts.split('~') }}"
+
+    - name: Assign parts to variables
+      set_fact:
+        servicenow_username: "{{ parts[0] }}"
+        servicenow_password: "{{ parts[1] }}"
+      
+    - name: Create SCTASK Request in ServiceNow
+      uri:
+        url: "{{ ansible_user }}"
+        method: POST
+        headers:
+          Content-Type: application/json
+        body_format: json
+        body: |
+          {
+            "short_description": "{{ task_short_description }}",
+            "description": "{{ task_description }}",
+            "work_notes": "{{ workNotes }}",
+            "urgency": "3",
+            "impact": "3"
+          }
+        status_code: 201
+        validate_certs: no
+        force_basic_auth: yes
+        user: "{{ servicenow_username }}"
+        password: "{{ servicenow_password }}"
+      register: response
+
+    - name: Check API response
+      debug:
+        var: response
+
+    - name: Check API response status
+      block:
+        - debug:
+            msg: "SCTASK created successfully"
+          when: response.status == 201
+      rescue:
+        - name: Handle API response status
+          fail:
+            msg: "Failed to create SCTASK. Error: {{ result }}"
+          when: response.status != 201
